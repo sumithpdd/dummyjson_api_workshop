@@ -5,6 +5,8 @@ import 'package:dummyjson_api_workshop/services/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 
 class Networking {
+  static const commonHeaders = {'Content-Type': 'application/json'};
+
   /// Makes a GET request and returns the response as a Map
   Future<Map<String, dynamic>> getRequest({required String url}) async {
     try {
@@ -45,6 +47,7 @@ class Networking {
   Future<Map<String, dynamic>> postRequest({
     required String url,
     required Map<String, dynamic> body,
+    Map<String, String>? headers = commonHeaders,
   }) async {
     try {
       final finalUrl = ApiEndpoints.baseUrl + url;
@@ -55,7 +58,7 @@ class Networking {
 
       final response = await http.post(
         uri,
-        headers: {'Content-Type': 'application/json'},
+        headers: commonHeaders,
         body: jsonEncode(body),
       );
       return handleResponse(response);

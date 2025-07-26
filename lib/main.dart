@@ -1,4 +1,5 @@
 import 'package:dummyjson_api_workshop/screens/all_products_sceen.dart';
+import 'package:dummyjson_api_workshop/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -18,7 +19,7 @@ class ApiIntegrationApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const AllProductsScreen(),
+      home: const LoginScreen(),
     );
   }
 }
