@@ -62,18 +62,49 @@ class ApiEndpoints {
 **Code Structure:**
 ```dart
 class Networking {
-  Future<String> getRequest({required String url}) async {
-    final finalUrl = ApiEndpoints.baseUrl + url;
-    final uri = Uri.parse(finalUrl);
-    final response = await http.get(uri);
+  /// Makes a GET request and returns the response as a Map
+  Future<Map<String, dynamic>> getRequest({required String url}) async {
+    try {
+      final finalUrl = ApiEndpoints.baseUrl + url;
+      final uri = Uri.parse(finalUrl);
+      
+      log('🌐 Making GET request to: $finalUrl');
+      
+      final response = await http.get(uri);
+      return handleResponse(response);
+    } catch (e) {
+      log('❌ Network error: $e');
+      throw Exception('Network error: $e');
+    }
+  }
+
+  /// Handles HTTP response and converts JSON to Map
+  Map<String, dynamic> handleResponse(http.Response response) {
+    log('📡 Response status: ${response.statusCode}');
+    
     if (response.statusCode == 200) {
-      return response.body;
+      try {
+        final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+        log('✅ Successfully parsed JSON to Map');
+        return jsonMap;
+      } catch (e) {
+        log('❌ JSON parsing error: $e');
+        throw Exception('Invalid JSON response: $e');
+      }
     } else {
-      throw Exception('Failed to load data');
+      log('❌ HTTP error: ${response.statusCode} - ${response.reasonPhrase}');
+      throw Exception('HTTP ${response.statusCode}: ${response.reasonPhrase}');
     }
   }
 }
 ```
+
+**Key Improvements:**
+- ✅ **Enhanced Logging**: Detailed logs with emojis for better debugging
+- ✅ **Better Error Handling**: Specific error messages for different failure types
+- ✅ **Type Safety**: Returns `Map<String, dynamic>` instead of String
+- ✅ **JSON Validation**: Proper JSON parsing with error handling
+- ✅ **HTTP Status Details**: Includes status codes and reason phrases in errors
 
 **Verify setup:**
 ```bash
@@ -102,14 +133,38 @@ You should see a basic app with "All Products" in the app bar.
 **Code Structure:**
 ```dart
 class Networking {
-  Future<String> getRequest({required String url}) async {
-    final finalUrl = ApiEndpoints.baseUrl + url;
-    final uri = Uri.parse(finalUrl);
-    final response = await http.get(uri);
+  /// Makes a GET request and returns the response as a Map
+  Future<Map<String, dynamic>> getRequest({required String url}) async {
+    try {
+      final finalUrl = ApiEndpoints.baseUrl + url;
+      final uri = Uri.parse(finalUrl);
+      
+      log('🌐 Making GET request to: $finalUrl');
+      
+      final response = await http.get(uri);
+      return handleResponse(response);
+    } catch (e) {
+      log('❌ Network error: $e');
+      throw Exception('Network error: $e');
+    }
+  }
+
+  /// Handles HTTP response and converts JSON to Map
+  Map<String, dynamic> handleResponse(http.Response response) {
+    log('📡 Response status: ${response.statusCode}');
+    
     if (response.statusCode == 200) {
-      return response.body;
+      try {
+        final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+        log('✅ Successfully parsed JSON to Map');
+        return jsonMap;
+      } catch (e) {
+        log('❌ JSON parsing error: $e');
+        throw Exception('Invalid JSON response: $e');
+      }
     } else {
-      throw Exception('Failed to load data');
+      log('❌ HTTP error: ${response.statusCode} - ${response.reasonPhrase}');
+      throw Exception('HTTP ${response.statusCode}: ${response.reasonPhrase}');
     }
   }
 }
@@ -123,17 +178,247 @@ class Networking {
 
 ---
 
-### Step 3: Create Product Data Models
+### Step 3: Create Product Data Models ✅ (Already Complete)
 
 **Objective:** Create Dart classes to represent the API response structure.
 
-**Tasks:**
-1. Create `lib/models/product.dart`
-2. Create `lib/models/product_response.dart`
-3. Add JSON annotations
-4. Generate serialization code
+**What we have:**
+- `lib/models/products.dart` - Product model with JSON annotations
+- Using `json_annotation` package for code generation
+- Commented out manual `fromJson` implementation to showcase automation
 
-**Expected Outcome:** Models that can parse the DummyJSON API response.
+**Current Implementation:**
+```dart
+import 'package:json_annotation/json_annotation.dart';
+
+part 'products.g.dart';
+
+@JsonSerializable()
+class Products {
+  final int? id;
+  final String? title;
+  final String? description;
+  final num? price;
+  final num? discountPercentage;
+  final num? rating;
+  final int? stock;
+  final String? brand;
+  final String? category;
+  final String? thumbnail;
+  final List<String>? images;
+
+  Products({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.price,
+    required this.discountPercentage,
+    required this.rating,
+    required this.stock,
+    required this.brand,
+    required this.category,
+    required this.thumbnail,
+    required this.images,
+  });
+
+  // Manual implementation (commented out to showcase automation)
+  // factory Products.fromJson(Map<String, dynamic> json) {
+  //   return Products(
+  //     id: json['id'],
+  //     title: json['title'],
+  //     description: json['description'],
+  //     price: json['price'],
+  //     discountPercentage: json['discountPercentage'],
+  //     rating: json['rating'],
+  //     stock: json['stock'],
+  //     brand: json['brand'],
+  //     category: json['category'],
+  //     thumbnail: json['thumbnail'],
+  //     images: json['images'],
+  //   );
+  // }
+
+  // Generated implementation (will be created by build_runner)
+  factory Products.fromJson(Map<String, dynamic> json) =>
+      _$ProductsFromJson(json);
+  Map<String, dynamic> toJson() => _$ProductsToJson(this);
+}
+```
+
+**Key Concepts Implemented:**
+
+1. **JSON Annotations**: `@JsonSerializable()` tells the code generator to create serialization methods
+2. **Part Files**: `part 'products.g.dart'` links to the generated code file
+3. **Nullable Fields**: Using `?` for optional fields that might be null in the API response
+4. **Type Safety**: Proper Dart types for each field (int, String, num, List<String>)
+5. **Code Generation**: Automated creation of `fromJson` and `toJson` methods
+
+**Benefits of Using json_annotation:**
+
+- ✅ **Reduces Boilerplate**: No need to write manual JSON parsing code
+- ✅ **Type Safety**: Compile-time checking for field types
+- ✅ **Maintainability**: Easy to add/remove fields without breaking serialization
+- ✅ **Performance**: Generated code is optimized and efficient
+- ✅ **Error Prevention**: Catches typos and type mismatches at compile time
+- ✅ **Consistency**: Standardized approach across all models
+
+**Next Step:** Generate the serialization code using build_runner ✅ (Complete)
+
+**Generated Code:**
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+**What was created:**
+- `lib/models/products.g.dart` - Automatically generated serialization code
+
+**Generated Implementation:**
+```dart
+// GENERATED CODE - DO NOT MODIFY BY HAND
+part of 'products.dart';
+
+Products _$ProductsFromJson(Map<String, dynamic> json) => Products(
+  id: (json['id'] as num?)?.toInt(),
+  title: json['title'] as String?,
+  description: json['description'] as String?,
+  price: json['price'] as num?,
+  discountPercentage: json['discountPercentage'] as num?,
+  rating: json['rating'] as num?,
+  stock: (json['stock'] as num?)?.toInt(),
+  brand: json['brand'] as String?,
+  category: json['category'] as String?,
+  thumbnail: json['thumbnail'] as String?,
+  images: (json['images'] as List<dynamic>?)?.map((e) => e as String).toList(),
+);
+
+Map<String, dynamic> _$ProductsToJson(Products instance) => <String, dynamic>{
+  'id': instance.id,
+  'title': instance.title,
+  'description': instance.description,
+  'price': instance.price,
+  'discountPercentage': instance.discountPercentage,
+  'rating': instance.rating,
+  'stock': instance.stock,
+  'brand': instance.brand,
+  'category': instance.category,
+  'thumbnail': instance.thumbnail,
+  'images': instance.images,
+};
+```
+
+**Key Features of Generated Code:**
+
+1. **Type Conversion**: Automatically handles `num` to `int` conversion for `id` and `stock`
+2. **Null Safety**: Properly handles nullable fields with `?` operators
+3. **List Processing**: Converts `List<dynamic>` to `List<String>` for images
+4. **Bidirectional**: Creates both `fromJson` (deserialization) and `toJson` (serialization)
+5. **Optimized**: Generated code is efficient and handles edge cases
+
+**Comparison: Manual vs Generated**
+
+**Manual Implementation (30+ lines):**
+```dart
+factory Products.fromJson(Map<String, dynamic> json) {
+  return Products(
+    id: json['id'],
+    title: json['title'],
+    description: json['description'],
+    // ... 8 more lines
+    images: json['images'],
+  );
+}
+```
+
+**Generated Implementation (15 lines):**
+```dart
+Products _$ProductsFromJson(Map<String, dynamic> json) => Products(
+  id: (json['id'] as num?)?.toInt(),
+  title: json['title'] as String?,
+  // ... handles all type conversions automatically
+);
+```
+
+**Benefits Demonstrated:**
+- ✅ **Less Code**: Generated version is more concise
+- ✅ **Type Safety**: Proper type casting and null handling
+- ✅ **Maintainability**: Add/remove fields and regenerate
+- ✅ **Error Prevention**: Compile-time validation
+- ✅ **Performance**: Optimized generated code
+
+**Usage Example:**
+```dart
+// Parse JSON string to Products object
+final jsonString = '{"id": 1, "title": "Product", ...}';
+final jsonMap = jsonDecode(jsonString);
+final product = Products.fromJson(jsonMap);
+
+// Convert Products object back to JSON
+final jsonMap = product.toJson();
+final jsonString = jsonEncode(jsonMap);
+```
+
+**Complete API Response Model:**
+
+We also created `lib/models/product_response.dart` to handle the complete API response structure:
+
+```dart
+@JsonSerializable()
+class ProductResponse {
+  final List<Products>? products;
+  final int? total;
+  final int? skip;
+  final int? limit;
+
+  ProductResponse({
+    required this.products,
+    required this.total,
+    required this.skip,
+    required this.limit,
+  });
+
+  factory ProductResponse.fromJson(Map<String, dynamic> json) =>
+      _$ProductResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$ProductResponseToJson(this);
+}
+```
+
+**Generated ProductResponse Code:**
+```dart
+ProductResponse _$ProductResponseFromJson(Map<String, dynamic> json) =>
+    ProductResponse(
+      products: (json['products'] as List<dynamic>?)
+          ?.map((e) => Products.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      total: (json['total'] as num?)?.toInt(),
+      skip: (json['skip'] as num?)?.toInt(),
+      limit: (json['limit'] as num?)?.toInt(),
+    );
+```
+
+**Key Features:**
+- ✅ **Nested Parsing**: Automatically parses the products array into `List<Products>`
+- ✅ **Pagination Support**: Handles `total`, `skip`, and `limit` fields
+- ✅ **Type Safety**: Proper type conversion for all fields
+- ✅ **Null Safety**: Handles optional fields gracefully
+
+**Complete Usage Example:**
+```dart
+// Parse complete API response
+final apiResponse = '{"products": [...], "total": 100, "skip": 0, "limit": 30}';
+final jsonMap = jsonDecode(apiResponse);
+final productResponse = ProductResponse.fromJson(jsonMap);
+
+// Access individual products
+final products = productResponse.products ?? [];
+final totalProducts = productResponse.total ?? 0;
+
+// Access first product details
+if (products.isNotEmpty) {
+  final firstProduct = products.first;
+  print('Product: ${firstProduct.title}');
+  print('Price: \$${firstProduct.price}');
+}
+```
 
 ---
 
@@ -185,10 +470,25 @@ class AllProductsScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('All Products')),
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
-            Networking().getRequest(url: ApiEndpoints.GET_ALL_PRODUCTS);
+          onPressed: () async {
+            try {
+              log('🔄 Starting API call...');
+              final response = await Networking().getRequest(
+                url: ApiEndpoints.GET_ALL_PRODUCTS,
+              );
+              
+              log('✅ API call successful!');
+              log('📊 Total products: ${response['total']}');
+              log('📦 Products array length: ${(response['products'] as List).length}');
+              
+              // TODO: Convert Map to ProductResponse model
+              // final productResponse = ProductResponse.fromJson(response);
+              
+            } catch (e) {
+              log('❌ API call failed: $e');
+            }
           },
-          child: Text("Get All Products"),
+          child: const Text("Get All Products"),
         ),
       ),
     );
@@ -219,18 +519,24 @@ class AllProductsScreen extends StatelessWidget {
 
 3. **What you should see in the console:**
    ```
-   {"products":[{"id":1,"title":"Essence Mascara Lash Princess",...}]}
+   🌐 Making GET request to: https://dummyjson.com/products
+   📡 Response status: 200
+   ✅ Successfully parsed JSON to Map
+   🔄 Starting API call...
+   ✅ API call successful!
+   📊 Total products: 100
+   📦 Products array length: 30
    ```
 
 4. **Current Issues to Fix:**
    - The button doesn't show loading state
    - No error handling if the API fails
    - The response is just logged, not displayed in the UI
-   - Need to convert the JSON string to Dart objects
+   - Need to convert the Map to ProductResponse model
 
 **Next Steps:**
-- Add proper async/await handling
-- Convert JSON response to Product objects
+- ✅ Add proper async/await handling (Complete)
+- Convert Map response to ProductResponse model
 - Display the data in a beautiful UI
 
 ---
@@ -510,8 +816,9 @@ try {
   final response = await networking.getRequest(
     url: ApiEndpoints.GET_ALL_PRODUCTS,
   );
-  // response contains the JSON string from the API
-  print(response);
+  // response is now a Map<String, dynamic> from the API
+  print('Total products: ${response['total']}');
+  print('Products: ${response['products']}');
 } catch (e) {
   // Handle network errors
   print('Error: $e');
@@ -534,8 +841,9 @@ onPressed: () async {
     final response = await Networking().getRequest(
       url: ApiEndpoints.GET_ALL_PRODUCTS,
     );
-    print('API Response: $response');
-    // TODO: Parse JSON and update UI
+    print('Total products: ${response['total']}');
+    print('Products array: ${response['products']}');
+    // TODO: Convert Map to ProductResponse model
   } catch (e) {
     print('Error: $e');
     // TODO: Show error message to user
@@ -554,9 +862,11 @@ onPressed: () async {
     final response = await Networking().getRequest(
       url: ApiEndpoints.GET_ALL_PRODUCTS,
     );
-    final products = parseProductsFromJson(response);
+    // Convert Map to ProductResponse model
+    final productResponse = ProductResponse.fromJson(response);
     setState(() {
-      this.products = products;
+      this.products = productResponse.products ?? [];
+      this.totalProducts = productResponse.total ?? 0;
       isLoading = false;
     });
   } catch (e) {
@@ -674,4 +984,4 @@ After completing this workshop:
 
 ---
 
-**Ready to start? Begin with Step 3: Create Product Data Models!** 
+**Ready to start? Begin with Step 4: Implement API Service!** 
