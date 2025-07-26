@@ -118,7 +118,9 @@ lib/
 ├── models/                             # Data models for API responses
 │   └── .gitkeep                       # Placeholder for model files
 ├── services/                           # API service classes
-│   └── .gitkeep                       # Placeholder for service files
+│   ├── api_endpoints.dart             # Centralized API endpoint configuration
+│   ├── networking.dart                # HTTP networking layer with error handling
+│   └── .gitkeep                       # Placeholder for additional service files
 ├── repositories/                       # Data repository layer
 │   └── .gitkeep                       # Placeholder for repository files
 ├── screens/                            # UI screens
@@ -136,6 +138,8 @@ lib/
 - Basic app structure with Material 3 design
 - Navigation extension for BuildContext
 - Initial products screen structure
+- API endpoints configuration for centralized URL management
+- HTTP networking layer with error handling and async/await implementation
 
 🔄 **In Progress:**
 - Product data models
